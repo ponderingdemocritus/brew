@@ -1,0 +1,137 @@
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f3ef;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #8c7851;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6a5c3d;
+}
+
+/* Range input styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 5px;
+  background: #e5e1d9;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #8c7851;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #8c7851;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Custom font styles */
+.font-handwritten {
+  font-family: 'Caveat', cursive;
+}
+
+/* Card styling */
+.card-border {
+  border: 1px solid #e5e1d9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.card-border:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom button styling */
+.btn-hipster {
+  background-color: #8c7851;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-hipster:hover {
+  background-color: #6a5c3d;
+}
+
+.btn-hipster-outline {
+  background-color: transparent;
+  color: #8c7851;
+  border: 1px solid #8c7851;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-hipster-outline:hover {
+  background-color: #f5f3ef;
+}
+
+/* Custom form styling */
+.input-hipster {
+  border: 1px solid #e5e1d9;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.input-hipster:focus {
+  border-color: #8c7851;
+  box-shadow: 0 0 0 2px rgba(140, 120, 81, 0.2);
+  outline: none;
+}
+
+/* Badge styling */
+.badge-hipster {
+  background-color: #f5f3ef;
+  color: #6a5c3d;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Star rating styling */
+.star-rating {
+  color: #d3c5a9;
+}
+
+.star-rating-filled {
+  color: #8c7851;
+}
