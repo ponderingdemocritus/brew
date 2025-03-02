@@ -1,6 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Coffee, Timer, Droplets, Scale, Plus, Edit, Trash2, Save, X, ChevronDown, ChevronUp, Thermometer, Award, DollarSign, CoffeeIcon } from 'lucide-react';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import {
+  Coffee,
+  Timer,
+  Droplets,
+  Scale,
+  Plus,
+  Edit,
+  Trash2,
+  Save,
+  X,
+  ChevronDown,
+  ChevronUp,
+  Thermometer,
+  Award,
+  DollarSign,
+  CoffeeIcon,
+} from "lucide-react";
+import "./App.css";
 
 // Types
 interface CoffeeExtraction {
@@ -20,63 +36,75 @@ interface CoffeeExtraction {
 
 function App() {
   const [extractions, setExtractions] = useState<CoffeeExtraction[]>(() => {
-    const saved = localStorage.getItem('coffeeExtractions');
+    const saved = localStorage.getItem("coffeeExtractions");
     return saved ? JSON.parse(saved) : [];
   });
-  
-  const [formData, setFormData] = useState<Omit<CoffeeExtraction, 'id' | 'date'>>({
-    beanName: '',
+
+  const [formData, setFormData] = useState<
+    Omit<CoffeeExtraction, "id" | "date">
+  >({
+    beanName: "",
     beanPrice: 0,
     coffeeWeight: 18,
     waterWeight: 36,
-    grindSize: 'Medium',
-    brewTime: '00:30',
+    grindSize: "Medium",
+    brewTime: "00:30",
     temperature: 93,
     rating: 3,
-    notes: '',
+    notes: "",
   });
-  
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
 
   // Save to localStorage whenever extractions change
   useEffect(() => {
-    localStorage.setItem('coffeeExtractions', JSON.stringify(extractions));
+    localStorage.setItem("coffeeExtractions", JSON.stringify(extractions));
   }, [extractions]);
 
   // Add Google Fonts
   useEffect(() => {
-    const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Work+Sans:wght@300;400;500;600;700&display=swap';
-    link.rel = 'stylesheet';
+    const link = document.createElement("link");
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Work+Sans:wght@300;400;500;600;700&display=swap";
+    link.rel = "stylesheet";
     document.head.appendChild(link);
-    
+
     // Apply fonts to body
     document.body.style.fontFamily = "'Work Sans', sans-serif";
-    
+
     return () => {
       document.head.removeChild(link);
     };
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: name === 'coffeeWeight' || name === 'waterWeight' || name === 'temperature' || name === 'rating' || name === 'beanPrice'
-        ? parseFloat(value) 
-        : value
+      [name]:
+        name === "coffeeWeight" ||
+        name === "waterWeight" ||
+        name === "temperature" ||
+        name === "rating" ||
+        name === "beanPrice"
+          ? parseFloat(value)
+          : value,
     }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (editingId) {
-      setExtractions(prev => 
-        prev.map(extraction => 
-          extraction.id === editingId 
-            ? { ...extraction, ...formData } 
+      setExtractions((prev) =>
+        prev.map((extraction) =>
+          extraction.id === editingId
+            ? { ...extraction, ...formData }
             : extraction
         )
       );
@@ -85,26 +113,26 @@ function App() {
       const newExtraction: CoffeeExtraction = {
         id: Date.now().toString(),
         date: new Date().toISOString(),
-        ...formData
+        ...formData,
       };
-      setExtractions(prev => [newExtraction, ...prev]);
+      setExtractions((prev) => [newExtraction, ...prev]);
     }
-    
+
     resetForm();
     setShowForm(false);
   };
 
   const resetForm = () => {
     setFormData({
-      beanName: '',
+      beanName: "",
       beanPrice: 0,
       coffeeWeight: 18,
       waterWeight: 36,
-      grindSize: 'Medium',
-      brewTime: '00:30',
+      grindSize: "Medium",
+      brewTime: "00:30",
       temperature: 93,
       rating: 3,
-      notes: '',
+      notes: "",
     });
   };
 
@@ -125,14 +153,14 @@ function App() {
   };
 
   const handleDelete = (id: string) => {
-    setExtractions(prev => prev.filter(extraction => extraction.id !== id));
+    setExtractions((prev) => prev.filter((extraction) => extraction.id !== id));
   };
 
   const toggleExpand = (id: string) => {
-    setExtractions(prev => 
-      prev.map(extraction => 
-        extraction.id === id 
-          ? { ...extraction, expanded: !extraction.expanded } 
+    setExtractions((prev) =>
+      prev.map((extraction) =>
+        extraction.id === id
+          ? { ...extraction, expanded: !extraction.expanded }
           : extraction
       )
     );
@@ -140,12 +168,12 @@ function App() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -154,10 +182,10 @@ function App() {
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
     }).format(price);
   };
 
@@ -165,12 +193,17 @@ function App() {
     <div className="min-h-screen bg-[#f8f5f0]">
       <header className="bg-[#3c3027] text-[#f8f5f0] p-6 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-3xl font-bold flex items-center" style={{ fontFamily: "'Playfair Display', serif" }}>
-            <Coffee className="mr-3" strokeWidth={1.5} /> 
+          <h1
+            className="text-3xl font-bold flex items-center"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            <Coffee className="mr-3" strokeWidth={1.5} />
             <span>Loafs Brew Journal</span>
-            <span className="ml-2 text-sm font-handwritten font-normal text-[#d3c5a9] mt-1">est. 2025</span>
+            <span className="ml-2 text-sm font-handwritten font-normal text-[#d3c5a9] mt-1">
+              est. 2025
+            </span>
           </h1>
-          <button 
+          <button
             onClick={() => {
               setShowForm(!showForm);
               if (editingId) {
@@ -180,8 +213,12 @@ function App() {
             }}
             className="bg-[#8c7851] hover:bg-[#6a5c3d] text-white px-5 py-2 rounded-md flex items-center transition-colors"
           >
-            {showForm ? <X className="mr-2" size={18} /> : <Plus className="mr-2" size={18} />}
-            {showForm ? 'Cancel' : 'New Extraction'}
+            {showForm ? (
+              <X className="mr-2" size={18} />
+            ) : (
+              <Plus className="mr-2" size={18} />
+            )}
+            {showForm ? "Cancel" : "New Extraction"}
           </button>
         </div>
       </header>
@@ -189,12 +226,18 @@ function App() {
       <main className="container mx-auto p-6">
         {showForm && (
           <div className="bg-white rounded-lg shadow-md p-8 mb-8 card-border animate-fadeIn">
-            <h2 className="text-2xl mb-6 text-[#3c3027]" style={{ fontFamily: "'Playfair Display', serif" }}>
-              {editingId ? 'Edit Extraction' : 'New Extraction'}
+            <h2
+              className="text-2xl mb-6 text-[#3c3027]"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              {editingId ? "Edit Extraction" : "New Extraction"}
             </h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-6 border-b border-[#e5e1d9] pb-6">
-                <h3 className="text-lg mb-4 text-[#3c3027]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <h3
+                  className="text-lg mb-4 text-[#3c3027]"
+                  style={{ fontFamily: "'Playfair Display', serif" }}
+                >
                   Bean Information
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -203,7 +246,11 @@ function App() {
                       Bean Name
                     </label>
                     <div className="relative">
-                      <CoffeeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]" size={18} strokeWidth={1.5} />
+                      <CoffeeIcon
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]"
+                        size={18}
+                        strokeWidth={1.5}
+                      />
                       <input
                         type="text"
                         name="beanName"
@@ -220,7 +267,11 @@ function App() {
                       Bean Price (per lb/kg)
                     </label>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]" size={18} strokeWidth={1.5} />
+                      <DollarSign
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]"
+                        size={18}
+                        strokeWidth={1.5}
+                      />
                       <input
                         type="number"
                         name="beanPrice"
@@ -235,14 +286,18 @@ function App() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Coffee Weight (g)
                   </label>
                   <div className="relative">
-                    <Scale className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]" size={18} strokeWidth={1.5} />
+                    <Scale
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]"
+                      size={18}
+                      strokeWidth={1.5}
+                    />
                     <input
                       type="number"
                       name="coffeeWeight"
@@ -254,13 +309,17 @@ function App() {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Water Weight (g)
                   </label>
                   <div className="relative">
-                    <Droplets className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]" size={18} strokeWidth={1.5} />
+                    <Droplets
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]"
+                      size={18}
+                      strokeWidth={1.5}
+                    />
                     <input
                       type="number"
                       name="waterWeight"
@@ -272,7 +331,7 @@ function App() {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Grind Size
@@ -293,13 +352,17 @@ function App() {
                     <option value="Extra Coarse">Extra Coarse</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Brew Time (mm:ss)
                   </label>
                   <div className="relative">
-                    <Timer className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]" size={18} strokeWidth={1.5} />
+                    <Timer
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]"
+                      size={18}
+                      strokeWidth={1.5}
+                    />
                     <input
                       type="text"
                       name="brewTime"
@@ -313,13 +376,17 @@ function App() {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Water Temperature (°C)
                   </label>
                   <div className="relative">
-                    <Thermometer className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]" size={18} strokeWidth={1.5} />
+                    <Thermometer
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]"
+                      size={18}
+                      strokeWidth={1.5}
+                    />
                     <input
                       type="number"
                       name="temperature"
@@ -332,13 +399,17 @@ function App() {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Rating (1-5)
                   </label>
                   <div className="flex items-center">
-                    <Award className="mr-2 text-[#8c7851]" size={18} strokeWidth={1.5} />
+                    <Award
+                      className="mr-2 text-[#8c7851]"
+                      size={18}
+                      strokeWidth={1.5}
+                    />
                     <input
                       type="range"
                       name="rating"
@@ -359,7 +430,7 @@ function App() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Notes
@@ -373,7 +444,7 @@ function App() {
                   placeholder="Flavor notes, body, acidity, sweetness, etc."
                 />
               </div>
-              
+
               <div className="flex justify-end">
                 <button
                   type="button"
@@ -391,7 +462,7 @@ function App() {
                   className="px-5 py-2 bg-[#8c7851] text-white rounded-md hover:bg-[#6a5c3d] flex items-center btn-hipster"
                 >
                   <Save className="mr-2" size={18} strokeWidth={1.5} />
-                  {editingId ? 'Update' : 'Save'} Extraction
+                  {editingId ? "Update" : "Save"} Extraction
                 </button>
               </div>
             </form>
@@ -399,33 +470,49 @@ function App() {
         )}
 
         <div className="bg-white rounded-lg shadow-md p-8 card-border">
-          <h2 className="text-2xl mb-6 text-[#3c3027]" style={{ fontFamily: "'Playfair Display', serif" }}>Your Extractions</h2>
-          
+          <h2
+            className="text-2xl mb-6 text-[#3c3027]"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            Your Extractions
+          </h2>
+
           {extractions.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <div className="bg-[#f5f3ef] w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Coffee className="text-[#8c7851]" size={48} strokeWidth={1.5} />
+                <Coffee
+                  className="text-[#8c7851]"
+                  size={48}
+                  strokeWidth={1.5}
+                />
               </div>
               <p className="text-lg">No extractions recorded yet.</p>
-              <p className="text-sm mt-2">Start by adding your first coffee extraction!</p>
+              <p className="text-sm mt-2">
+                Start by adding your first coffee extraction!
+              </p>
             </div>
           ) : (
             <div className="space-y-5">
-              {extractions.map(extraction => (
-                <div 
-                  key={extraction.id} 
+              {extractions.map((extraction) => (
+                <div
+                  key={extraction.id}
                   className="border border-[#e5e1d9] rounded-lg overflow-hidden card-border"
                 >
-                  <div 
+                  <div
                     className="bg-[#f5f3ef] p-5 flex justify-between items-center cursor-pointer"
                     onClick={() => toggleExpand(extraction.id)}
                   >
                     <div>
-                      <div className="font-medium text-[#3c3027] flex items-center" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      <div
+                        className="font-medium text-[#3c3027] flex items-center"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                      >
                         {extraction.beanName ? (
                           <>
                             <span className="mr-2">{extraction.beanName}</span>
-                            <span className="text-sm text-[#8c7851]">({formatDate(extraction.date)})</span>
+                            <span className="text-sm text-[#8c7851]">
+                              ({formatDate(extraction.date)})
+                            </span>
                           </>
                         ) : (
                           formatDate(extraction.date)
@@ -434,32 +521,53 @@ function App() {
                       <div className="text-sm text-gray-600 mt-1 flex items-center flex-wrap">
                         {extraction.beanPrice > 0 && (
                           <span className="badge-hipster mr-2 mb-1">
-                            <DollarSign size={14} className="inline mr-1" strokeWidth={1.5} /> {formatPrice(extraction.beanPrice)}
+                            <DollarSign
+                              size={14}
+                              className="inline mr-1"
+                              strokeWidth={1.5}
+                            />{" "}
+                            {formatPrice(extraction.beanPrice)}
                           </span>
                         )}
                         <span className="badge-hipster mr-2 mb-1">
-                          <Scale size={14} className="inline mr-1" strokeWidth={1.5} /> {extraction.coffeeWeight}g
+                          <Scale
+                            size={14}
+                            className="inline mr-1"
+                            strokeWidth={1.5}
+                          />{" "}
+                          {extraction.coffeeWeight}g
                         </span>
                         <span className="badge-hipster mr-2 mb-1">
-                          <Droplets size={14} className="inline mr-1" strokeWidth={1.5} /> {extraction.waterWeight}g
+                          <Droplets
+                            size={14}
+                            className="inline mr-1"
+                            strokeWidth={1.5}
+                          />{" "}
+                          {extraction.waterWeight}g
                         </span>
                         <span className="badge-hipster mb-1">
-                          1:{calculateRatio(extraction.coffeeWeight, extraction.waterWeight)}
+                          1:
+                          {calculateRatio(
+                            extraction.coffeeWeight,
+                            extraction.waterWeight
+                          )}
                         </span>
                       </div>
                     </div>
                     <div className="flex items-center">
                       <div className="mr-4 flex star-rating">
                         {[...Array(5)].map((_, i) => (
-                          <span 
-                            key={i} 
-                            className={`text-lg ${i < extraction.rating ? 'star-rating-filled' : ''}`}
+                          <span
+                            key={i}
+                            className={`text-lg ${
+                              i < extraction.rating ? "star-rating-filled" : ""
+                            }`}
                           >
                             ★
                           </span>
                         ))}
                       </div>
-                      <button 
+                      <button
                         className="p-2 text-gray-500 hover:text-[#8c7851] transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -468,7 +576,7 @@ function App() {
                       >
                         <Edit size={18} strokeWidth={1.5} />
                       </button>
-                      <button 
+                      <button
                         className="p-2 text-gray-500 hover:text-red-600 transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -477,49 +585,88 @@ function App() {
                       >
                         <Trash2 size={18} strokeWidth={1.5} />
                       </button>
-                      {extraction.expanded ? 
-                        <ChevronUp size={18} className="text-[#8c7851] ml-1" strokeWidth={1.5} /> : 
-                        <ChevronDown size={18} className="text-[#8c7851] ml-1" strokeWidth={1.5} />
-                      }
+                      {extraction.expanded ? (
+                        <ChevronUp
+                          size={18}
+                          className="text-[#8c7851] ml-1"
+                          strokeWidth={1.5}
+                        />
+                      ) : (
+                        <ChevronDown
+                          size={18}
+                          className="text-[#8c7851] ml-1"
+                          strokeWidth={1.5}
+                        />
+                      )}
                     </div>
                   </div>
-                  
+
                   {extraction.expanded && (
                     <div className="p-5 bg-white animate-fadeIn">
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-5">
                         <div className="bg-[#f8f5f0] p-3 rounded-md">
-                          <div className="text-xs text-gray-500 mb-1">Grind Size</div>
+                          <div className="text-xs text-gray-500 mb-1">
+                            Grind Size
+                          </div>
                           <div className="font-medium text-[#3c3027] flex items-center">
-                            <Coffee size={16} className="mr-2 text-[#8c7851]" strokeWidth={1.5} />
+                            <Coffee
+                              size={16}
+                              className="mr-2 text-[#8c7851]"
+                              strokeWidth={1.5}
+                            />
                             {extraction.grindSize}
                           </div>
                         </div>
                         <div className="bg-[#f8f5f0] p-3 rounded-md">
-                          <div className="text-xs text-gray-500 mb-1">Brew Time</div>
+                          <div className="text-xs text-gray-500 mb-1">
+                            Brew Time
+                          </div>
                           <div className="font-medium text-[#3c3027] flex items-center">
-                            <Timer size={16} className="mr-2 text-[#8c7851]" strokeWidth={1.5} />
+                            <Timer
+                              size={16}
+                              className="mr-2 text-[#8c7851]"
+                              strokeWidth={1.5}
+                            />
                             {extraction.brewTime}
                           </div>
                         </div>
                         <div className="bg-[#f8f5f0] p-3 rounded-md">
-                          <div className="text-xs text-gray-500 mb-1">Temperature</div>
+                          <div className="text-xs text-gray-500 mb-1">
+                            Temperature
+                          </div>
                           <div className="font-medium text-[#3c3027] flex items-center">
-                            <Thermometer size={16} className="mr-2 text-[#8c7851]" strokeWidth={1.5} />
+                            <Thermometer
+                              size={16}
+                              className="mr-2 text-[#8c7851]"
+                              strokeWidth={1.5}
+                            />
                             {extraction.temperature}°C
                           </div>
                         </div>
                         <div className="bg-[#f8f5f0] p-3 rounded-md">
-                          <div className="text-xs text-gray-500 mb-1">Ratio</div>
+                          <div className="text-xs text-gray-500 mb-1">
+                            Ratio
+                          </div>
                           <div className="font-medium text-[#3c3027] flex items-center">
-                            <Scale size={16} className="mr-2 text-[#8c7851]" strokeWidth={1.5} />
-                            1:{calculateRatio(extraction.coffeeWeight, extraction.waterWeight)}
+                            <Scale
+                              size={16}
+                              className="mr-2 text-[#8c7851]"
+                              strokeWidth={1.5}
+                            />
+                            1:
+                            {calculateRatio(
+                              extraction.coffeeWeight,
+                              extraction.waterWeight
+                            )}
                           </div>
                         </div>
                       </div>
-                      
+
                       {extraction.notes && (
                         <div>
-                          <div className="text-xs text-gray-500 mb-1">Tasting Notes</div>
+                          <div className="text-xs text-gray-500 mb-1">
+                            Tasting Notes
+                          </div>
                           <div className="bg-[#f8f5f0] p-4 rounded-md text-gray-700 font-handwritten text-lg">
                             {extraction.notes}
                           </div>
@@ -533,11 +680,16 @@ function App() {
           )}
         </div>
       </main>
-      
+
       <footer className="bg-[#3c3027] text-[#f8f5f0] p-4 mt-12">
         <div className="container mx-auto text-center text-sm">
           <p className="font-handwritten text-lg mb-1">Loafs Brew Journal</p>
-          <p className="text-[#d3c5a9]">Track your coffee journey, one extraction at a time</p>
+          <p className="text-[#d3c5a9]">
+            Track your coffee journey, one extraction at a time
+          </p>
+          <p className="text-[#d3c5a9] mt-2 text-xs">
+            Generated entirely with vibes
+          </p>
         </div>
       </footer>
     </div>
