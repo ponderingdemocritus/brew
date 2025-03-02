@@ -17,38 +17,41 @@ import {
   CoffeeIcon,
 } from "lucide-react";
 import "./App.css";
+import { CoffeeExtraction } from "./lib/supabase";
+import {
+  getExtractions,
+  addExtraction,
+  updateExtraction,
+  deleteExtraction,
+} from "./services/extractionService";
+import { getSession } from "./services/authService";
+import Auth from "./components/Auth";
+import UserProfile from "./components/UserProfile";
 
 // Types
-interface CoffeeExtraction {
-  id: string;
-  date: string;
-  beanName: string;
-  beanPrice: number;
-  coffeeWeight: number;
-  waterWeight: number;
-  grindSize: string;
-  brewTime: string;
-  temperature: number;
-  rating: number;
-  notes: string;
+// Using the CoffeeExtraction type from supabase.ts
+// Adding a UI-specific property
+interface UIExtraction extends CoffeeExtraction {
   expanded?: boolean;
 }
 
 function App() {
-  const [extractions, setExtractions] = useState<CoffeeExtraction[]>(() => {
-    const saved = localStorage.getItem("coffeeExtractions");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [extractions, setExtractions] = useState<UIExtraction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   const [formData, setFormData] = useState<
-    Omit<CoffeeExtraction, "id" | "date">
+    Omit<CoffeeExtraction, "id" | "created_at" | "user_id">
   >({
-    beanName: "",
-    beanPrice: 0,
-    coffeeWeight: 18,
-    waterWeight: 36,
-    grindSize: "Medium",
-    brewTime: "00:30",
+    date: new Date().toISOString(),
+    bean_name: "",
+    bean_price: 0,
+    coffee_weight: 18,
+    water_weight: 36,
+    grind_size: "Medium",
+    brew_time: "00:30",
     temperature: 93,
     rating: 3,
     notes: "",
@@ -57,10 +60,45 @@ function App() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
 
-  // Save to localStorage whenever extractions change
+  // Check authentication status on component mount
   useEffect(() => {
-    localStorage.setItem("coffeeExtractions", JSON.stringify(extractions));
-  }, [extractions]);
+    const checkAuth = async () => {
+      try {
+        const session = await getSession();
+        setAuthenticated(!!session);
+      } catch (err) {
+        console.error("Error checking authentication:", err);
+        setAuthenticated(false);
+      } finally {
+        setAuthChecked(true);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  // Fetch extractions from Supabase when authenticated
+  useEffect(() => {
+    if (authenticated) {
+      const fetchExtractions = async () => {
+        try {
+          setLoading(true);
+          const data = await getExtractions();
+          setExtractions(data);
+          setError(null);
+        } catch (err) {
+          console.error("Error fetching extractions:", err);
+          setError(
+            "Failed to load coffee extractions. Please try again later."
+          );
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchExtractions();
+    }
+  }, [authenticated]);
 
   // Add Google Fonts
   useEffect(() => {
@@ -87,63 +125,78 @@ function App() {
     setFormData((prev) => ({
       ...prev,
       [name]:
-        name === "coffeeWeight" ||
-        name === "waterWeight" ||
+        name === "coffee_weight" ||
+        name === "water_weight" ||
         name === "temperature" ||
         name === "rating" ||
-        name === "beanPrice"
+        name === "bean_price"
           ? parseFloat(value)
           : value,
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (editingId) {
-      setExtractions((prev) =>
-        prev.map((extraction) =>
-          extraction.id === editingId
-            ? { ...extraction, ...formData }
-            : extraction
-        )
-      );
-      setEditingId(null);
-    } else {
-      const newExtraction: CoffeeExtraction = {
-        id: Date.now().toString(),
-        date: new Date().toISOString(),
-        ...formData,
-      };
-      setExtractions((prev) => [newExtraction, ...prev]);
-    }
+    try {
+      if (editingId) {
+        // Update existing extraction
+        const updatedExtraction = await updateExtraction({
+          id: editingId,
+          ...formData,
+        });
 
-    resetForm();
-    setShowForm(false);
+        setExtractions((prev) =>
+          prev.map((extraction) =>
+            extraction.id === editingId
+              ? { ...updatedExtraction, expanded: extraction.expanded }
+              : extraction
+          )
+        );
+        setEditingId(null);
+      } else {
+        // Add new extraction
+        const newExtraction = await addExtraction({
+          ...formData,
+          date: new Date().toISOString(),
+        });
+
+        setExtractions((prev) => [newExtraction, ...prev]);
+      }
+
+      resetForm();
+      setShowForm(false);
+      setError(null);
+    } catch (err) {
+      console.error("Error saving extraction:", err);
+      setError("Failed to save coffee extraction. Please try again.");
+    }
   };
 
   const resetForm = () => {
     setFormData({
-      beanName: "",
-      beanPrice: 0,
-      coffeeWeight: 18,
-      waterWeight: 36,
-      grindSize: "Medium",
-      brewTime: "00:30",
+      date: new Date().toISOString(),
+      bean_name: "",
+      bean_price: 0,
+      coffee_weight: 18,
+      water_weight: 36,
+      grind_size: "Medium",
+      brew_time: "00:30",
       temperature: 93,
       rating: 3,
       notes: "",
     });
   };
 
-  const handleEdit = (extraction: CoffeeExtraction) => {
+  const handleEdit = (extraction: UIExtraction) => {
     setFormData({
-      beanName: extraction.beanName,
-      beanPrice: extraction.beanPrice,
-      coffeeWeight: extraction.coffeeWeight,
-      waterWeight: extraction.waterWeight,
-      grindSize: extraction.grindSize,
-      brewTime: extraction.brewTime,
+      date: extraction.date,
+      bean_name: extraction.bean_name,
+      bean_price: extraction.bean_price,
+      coffee_weight: extraction.coffee_weight,
+      water_weight: extraction.water_weight,
+      grind_size: extraction.grind_size,
+      brew_time: extraction.brew_time,
       temperature: extraction.temperature,
       rating: extraction.rating,
       notes: extraction.notes,
@@ -152,8 +205,17 @@ function App() {
     setShowForm(true);
   };
 
-  const handleDelete = (id: string) => {
-    setExtractions((prev) => prev.filter((extraction) => extraction.id !== id));
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteExtraction(id);
+      setExtractions((prev) =>
+        prev.filter((extraction) => extraction.id !== id)
+      );
+      setError(null);
+    } catch (err) {
+      console.error("Error deleting extraction:", err);
+      setError("Failed to delete coffee extraction. Please try again.");
+    }
   };
 
   const toggleExpand = (id: string) => {
@@ -189,6 +251,47 @@ function App() {
     }).format(price);
   };
 
+  // If authentication is still being checked, show loading
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-[#f8f5f0] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8c7851] mx-auto mb-4"></div>
+          <p className="text-[#3c3027]">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated, show auth form
+  if (!authenticated) {
+    return (
+      <div className="min-h-screen bg-[#f8f5f0]">
+        <header className="bg-[#3c3027] text-[#f8f5f0] p-4 md:p-6 shadow-md">
+          <div className="container mx-auto">
+            <h1
+              className="text-2xl md:text-3xl font-bold flex items-center justify-center"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              <Coffee className="mr-3" strokeWidth={1.5} />
+              <span>Loafs Brew Journal</span>
+              <span className="ml-2 text-sm font-handwritten font-normal text-[#d3c5a9] mt-1">
+                est. 2025
+              </span>
+            </h1>
+          </div>
+        </header>
+
+        <main
+          className="container mx-auto p-4 md:p-6 flex items-center justify-center"
+          style={{ minHeight: "calc(100vh - 80px)" }}
+        >
+          <Auth onAuthSuccess={() => setAuthenticated(true)} />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f8f5f0]">
       <header className="bg-[#3c3027] text-[#f8f5f0] p-4 md:p-6 shadow-md">
@@ -203,27 +306,42 @@ function App() {
               est. 2025
             </span>
           </h1>
-          <button
-            onClick={() => {
-              setShowForm(!showForm);
-              if (editingId) {
-                setEditingId(null);
-                resetForm();
-              }
-            }}
-            className="bg-[#8c7851] hover:bg-[#6a5c3d] text-white px-5 py-2 rounded-md flex items-center transition-colors w-full sm:w-auto justify-center sm:justify-start"
-          >
-            {showForm ? (
-              <X className="mr-2" size={18} />
-            ) : (
-              <Plus className="mr-2" size={18} />
-            )}
-            {showForm ? "Cancel" : "New Extraction"}
-          </button>
+          <div className="flex items-center space-x-4">
+            <UserProfile onSignOut={() => setAuthenticated(false)} />
+            <button
+              onClick={() => {
+                setShowForm(!showForm);
+                if (editingId) {
+                  setEditingId(null);
+                  resetForm();
+                }
+              }}
+              className="btn-hipster flex items-center"
+            >
+              {showForm ? (
+                <>
+                  <X className="mr-2" size={18} /> Cancel
+                </>
+              ) : (
+                <>
+                  <Plus className="mr-2" size={18} /> New Extraction
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="container mx-auto p-4 md:p-6">
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
+            <p className="flex items-center">
+              <X className="mr-2" size={18} />
+              {error}
+            </p>
+          </div>
+        )}
+
         {showForm && (
           <div className="bg-white rounded-lg shadow-md p-4 md:p-8 mb-8 card-border animate-fadeIn">
             <h2
@@ -253,8 +371,8 @@ function App() {
                       />
                       <input
                         type="text"
-                        name="beanName"
-                        value={formData.beanName}
+                        name="bean_name"
+                        value={formData.bean_name}
                         onChange={handleInputChange}
                         className="pl-10 w-full p-3 border border-gray-200 rounded-md focus:ring-[#8c7851] focus:border-[#8c7851] input-hipster"
                         placeholder="Ethiopia Yirgacheffe, etc."
@@ -274,8 +392,8 @@ function App() {
                       />
                       <input
                         type="number"
-                        name="beanPrice"
-                        value={formData.beanPrice}
+                        name="bean_price"
+                        value={formData.bean_price}
                         onChange={handleInputChange}
                         className="pl-10 w-full p-3 border border-gray-200 rounded-md focus:ring-[#8c7851] focus:border-[#8c7851] input-hipster"
                         step="0.01"
@@ -300,8 +418,8 @@ function App() {
                     />
                     <input
                       type="number"
-                      name="coffeeWeight"
-                      value={formData.coffeeWeight}
+                      name="coffee_weight"
+                      value={formData.coffee_weight}
                       onChange={handleInputChange}
                       className="pl-10 w-full p-3 border border-gray-200 rounded-md focus:ring-[#8c7851] focus:border-[#8c7851] input-hipster"
                       step="0.1"
@@ -322,8 +440,8 @@ function App() {
                     />
                     <input
                       type="number"
-                      name="waterWeight"
-                      value={formData.waterWeight}
+                      name="water_weight"
+                      value={formData.water_weight}
                       onChange={handleInputChange}
                       className="pl-10 w-full p-3 border border-gray-200 rounded-md focus:ring-[#8c7851] focus:border-[#8c7851] input-hipster"
                       step="0.1"
@@ -337,8 +455,8 @@ function App() {
                     Grind Size
                   </label>
                   <select
-                    name="grindSize"
-                    value={formData.grindSize}
+                    name="grind_size"
+                    value={formData.grind_size}
                     onChange={handleInputChange}
                     className="w-full p-3 border border-gray-200 rounded-md focus:ring-[#8c7851] focus:border-[#8c7851] input-hipster"
                     required
@@ -365,8 +483,8 @@ function App() {
                     />
                     <input
                       type="text"
-                      name="brewTime"
-                      value={formData.brewTime}
+                      name="brew_time"
+                      value={formData.brew_time}
                       onChange={handleInputChange}
                       className="pl-10 w-full p-3 border border-gray-200 rounded-md focus:ring-[#8c7851] focus:border-[#8c7851] input-hipster"
                       placeholder="00:30"
@@ -469,27 +587,38 @@ function App() {
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-8 card-border">
+        <div className="mt-8">
           <h2
-            className="text-xl md:text-2xl mb-6 text-[#3c3027]"
+            className="text-xl md:text-2xl font-bold mb-6 text-[#3c3027]"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
             Your Extractions
           </h2>
 
-          {extractions.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <div className="bg-[#f5f3ef] w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Coffee
-                  className="text-[#8c7851]"
-                  size={48}
-                  strokeWidth={1.5}
-                />
-              </div>
-              <p className="text-lg">No extractions recorded yet.</p>
-              <p className="text-sm mt-2">
-                Start by adding your first coffee extraction!
+          {loading ? (
+            <div className="flex justify-center items-center p-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8c7851]"></div>
+            </div>
+          ) : extractions.length === 0 ? (
+            <div className="text-center p-12 bg-white rounded-lg shadow-sm border border-gray-100">
+              <Coffee
+                className="mx-auto mb-4 text-[#8c7851]"
+                size={48}
+                strokeWidth={1.5}
+              />
+              <h3 className="text-lg font-medium text-[#3c3027] mb-2">
+                No extractions yet
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Start by adding your first coffee extraction using the "New
+                Extraction" button.
               </p>
+              <button
+                onClick={() => setShowForm(true)}
+                className="btn-hipster inline-flex items-center"
+              >
+                <Plus className="mr-2" size={18} /> New Extraction
+              </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 extraction-grid">
@@ -507,9 +636,9 @@ function App() {
                         className="font-medium text-[#3c3027] flex items-center"
                         style={{ fontFamily: "'Playfair Display', serif" }}
                       >
-                        {extraction.beanName ? (
+                        {extraction.bean_name ? (
                           <>
-                            <span className="mr-2">{extraction.beanName}</span>
+                            <span className="mr-2">{extraction.bean_name}</span>
                             <span className="text-sm text-[#8c7851]">
                               ({formatDate(extraction.date)})
                             </span>
@@ -519,14 +648,14 @@ function App() {
                         )}
                       </div>
                       <div className="text-sm text-gray-600 mt-1 flex items-center flex-wrap">
-                        {extraction.beanPrice > 0 && (
+                        {extraction.bean_price > 0 && (
                           <span className="badge-hipster mr-2 mb-1">
                             <DollarSign
                               size={14}
                               className="inline mr-1"
                               strokeWidth={1.5}
                             />{" "}
-                            {formatPrice(extraction.beanPrice)}
+                            {formatPrice(extraction.bean_price)}
                           </span>
                         )}
                         <span className="badge-hipster mr-2 mb-1">
@@ -535,7 +664,7 @@ function App() {
                             className="inline mr-1"
                             strokeWidth={1.5}
                           />{" "}
-                          {extraction.coffeeWeight}g
+                          {extraction.coffee_weight}g
                         </span>
                         <span className="badge-hipster mr-2 mb-1">
                           <Droplets
@@ -543,13 +672,13 @@ function App() {
                             className="inline mr-1"
                             strokeWidth={1.5}
                           />{" "}
-                          {extraction.waterWeight}g
+                          {extraction.water_weight}g
                         </span>
                         <span className="badge-hipster mb-1">
                           1:
                           {calculateRatio(
-                            extraction.coffeeWeight,
-                            extraction.waterWeight
+                            extraction.coffee_weight,
+                            extraction.water_weight
                           )}
                         </span>
                       </div>
@@ -614,7 +743,7 @@ function App() {
                               className="mr-2 text-[#8c7851]"
                               strokeWidth={1.5}
                             />
-                            {extraction.grindSize}
+                            {extraction.grind_size}
                           </div>
                         </div>
                         <div className="bg-[#f8f5f0] p-3 rounded-md">
@@ -627,7 +756,7 @@ function App() {
                               className="mr-2 text-[#8c7851]"
                               strokeWidth={1.5}
                             />
-                            {extraction.brewTime}
+                            {extraction.brew_time}
                           </div>
                         </div>
                         <div className="bg-[#f8f5f0] p-3 rounded-md">
@@ -655,8 +784,8 @@ function App() {
                             />
                             1:
                             {calculateRatio(
-                              extraction.coffeeWeight,
-                              extraction.waterWeight
+                              extraction.coffee_weight,
+                              extraction.water_weight
                             )}
                           </div>
                         </div>
