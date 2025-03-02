@@ -1,0 +1,104 @@
+/* Responsive styles */
+
+/* Base mobile styles (up to 640px) */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+  
+  .extraction-card {
+    padding: 1rem !important;
+  }
+  
+  .extraction-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .extraction-details {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  
+  .btn-group {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  
+  .btn-group button {
+    width: 100% !important;
+    margin-bottom: 0.5rem !important;
+  }
+}
+
+/* Small tablets (641px to 768px) */
+@media (min-width: 641px) and (max-width: 768px) {
+  .container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  
+  .extraction-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Tablets (769px to 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .extraction-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Touch-friendly inputs for mobile */
+@media (max-width: 768px) {
+  input, select, textarea, button {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+    padding: 0.75rem !important;
+  }
+  
+  .input-group {
+    margin-bottom: 1rem !important;
+  }
+  
+  /* Improve tap targets */
+  button, .btn-hipster, .btn-hipster-outline {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  /* Adjust spacing */
+  .py-4 {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+  
+  .px-4 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
+/* Fix for fixed position elements on iOS */
+.fixed {
+  position: fixed;
+  width: 100%;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+} 

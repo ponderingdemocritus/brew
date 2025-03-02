@@ -191,10 +191,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#f8f5f0]">
-      <header className="bg-[#3c3027] text-[#f8f5f0] p-6 shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
+      <header className="bg-[#3c3027] text-[#f8f5f0] p-4 md:p-6 shadow-md">
+        <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center">
           <h1
-            className="text-3xl font-bold flex items-center"
+            className="text-2xl md:text-3xl font-bold flex items-center mb-4 sm:mb-0"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
             <Coffee className="mr-3" strokeWidth={1.5} />
@@ -211,7 +211,7 @@ function App() {
                 resetForm();
               }
             }}
-            className="bg-[#8c7851] hover:bg-[#6a5c3d] text-white px-5 py-2 rounded-md flex items-center transition-colors"
+            className="bg-[#8c7851] hover:bg-[#6a5c3d] text-white px-5 py-2 rounded-md flex items-center transition-colors w-full sm:w-auto justify-center sm:justify-start"
           >
             {showForm ? (
               <X className="mr-2" size={18} />
@@ -223,11 +223,11 @@ function App() {
         </div>
       </header>
 
-      <main className="container mx-auto p-6">
+      <main className="container mx-auto p-4 md:p-6">
         {showForm && (
-          <div className="bg-white rounded-lg shadow-md p-8 mb-8 card-border animate-fadeIn">
+          <div className="bg-white rounded-lg shadow-md p-4 md:p-8 mb-8 card-border animate-fadeIn">
             <h2
-              className="text-2xl mb-6 text-[#3c3027]"
+              className="text-xl md:text-2xl mb-6 text-[#3c3027]"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
               {editingId ? "Edit Extraction" : "New Extraction"}
@@ -240,7 +240,7 @@ function App() {
                 >
                   Bean Information
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 form-grid">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Bean Name
@@ -469,9 +469,9 @@ function App() {
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow-md p-8 card-border">
+        <div className="bg-white rounded-lg shadow-md p-4 md:p-8 card-border">
           <h2
-            className="text-2xl mb-6 text-[#3c3027]"
+            className="text-xl md:text-2xl mb-6 text-[#3c3027]"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
             Your Extractions
@@ -492,11 +492,11 @@ function App() {
               </p>
             </div>
           ) : (
-            <div className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 extraction-grid">
               {extractions.map((extraction) => (
                 <div
                   key={extraction.id}
-                  className="border border-[#e5e1d9] rounded-lg overflow-hidden card-border"
+                  className="bg-[#f8f5f0] rounded-lg overflow-hidden card-border extraction-card"
                 >
                   <div
                     className="bg-[#f5f3ef] p-5 flex justify-between items-center cursor-pointer"
@@ -602,8 +602,8 @@ function App() {
                   </div>
 
                   {extraction.expanded && (
-                    <div className="p-5 bg-white animate-fadeIn">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-5">
+                    <div className="p-4 md:p-5 bg-white animate-fadeIn">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 mb-5 extraction-details">
                         <div className="bg-[#f8f5f0] p-3 rounded-md">
                           <div className="text-xs text-gray-500 mb-1">
                             Grind Size
@@ -663,15 +663,38 @@ function App() {
                       </div>
 
                       {extraction.notes && (
-                        <div>
+                        <div className="bg-[#f8f5f0] p-3 rounded-md mb-4">
                           <div className="text-xs text-gray-500 mb-1">
-                            Tasting Notes
+                            Notes
                           </div>
-                          <div className="bg-[#f8f5f0] p-4 rounded-md text-gray-700 font-handwritten text-lg">
+                          <div className="text-[#3c3027] text-sm whitespace-pre-wrap">
                             {extraction.notes}
                           </div>
                         </div>
                       )}
+
+                      <div className="flex justify-end space-x-2 mt-4 btn-group">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(extraction);
+                          }}
+                          className="px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 btn-hipster-outline"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(extraction.id);
+                          }}
+                          className="px-5 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 btn-hipster"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -681,7 +704,7 @@ function App() {
         </div>
       </main>
 
-      <footer className="bg-[#3c3027] text-[#f8f5f0] p-4 mt-12">
+      <footer className="bg-[#3c3027] text-[#f8f5f0] p-4 mt-8 md:mt-12">
         <div className="container mx-auto text-center text-sm">
           <p className="font-handwritten text-lg mb-1">Loafs Brew Journal</p>
           <p className="text-[#d3c5a9]">
