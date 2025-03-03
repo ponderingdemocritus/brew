@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
+    "@tanstack/react-router": "^1.112.0",
     "@types/uuid": "^10.0.0",
     "dotenv": "^16.4.7",
     "lucide-react": "^0.344.0",
@@ -20,6 +21,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
+    "@tanstack/router-devtools": "^1.112.6",
+    "@tanstack/router-plugin": "^1.112.3",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",

@@ -26,7 +26,6 @@ import {
 } from "./services/extractionService";
 import { getSession } from "./services/authService";
 import Auth from "./components/Auth";
-import UserProfile from "./components/UserProfile";
 
 // Types
 // Using the CoffeeExtraction type from supabase.ts
@@ -293,46 +292,8 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f5f0]">
-      <header className="bg-[#3c3027] text-[#f8f5f0] p-4 md:p-6 shadow-md">
-        <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center">
-          <h1
-            className="text-2xl md:text-3xl font-bold flex items-center mb-4 sm:mb-0"
-            style={{ fontFamily: "'Playfair Display', serif" }}
-          >
-            <Coffee className="mr-3" strokeWidth={1.5} />
-            <span>Loafs Brew Journal</span>
-            <span className="ml-2 text-sm font-handwritten font-normal text-[#d3c5a9] mt-1">
-              est. 2025
-            </span>
-          </h1>
-          <div className="flex items-center space-x-4">
-            <UserProfile onSignOut={() => setAuthenticated(false)} />
-            <button
-              onClick={() => {
-                setShowForm(!showForm);
-                if (editingId) {
-                  setEditingId(null);
-                  resetForm();
-                }
-              }}
-              className="btn-hipster flex items-center"
-            >
-              {showForm ? (
-                <>
-                  <X className="mr-2" size={18} /> Cancel
-                </>
-              ) : (
-                <>
-                  <Plus className="mr-2" size={18} /> New Extraction
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto p-4 md:p-6">
+    <div>
+      <main className="container mx-auto">
         {error && (
           <div className="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
             <p className="flex items-center">
@@ -365,7 +326,7 @@ function App() {
                     </label>
                     <div className="relative">
                       <CoffeeIcon
-                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]"
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851] z-20"
                         size={18}
                         strokeWidth={1.5}
                       />
@@ -386,7 +347,7 @@ function App() {
                     </label>
                     <div className="relative">
                       <DollarSign
-                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]"
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851] z-20"
                         size={18}
                         strokeWidth={1.5}
                       />
@@ -412,7 +373,7 @@ function App() {
                   </label>
                   <div className="relative">
                     <Scale
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]"
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851] z-20"
                       size={18}
                       strokeWidth={1.5}
                     />
@@ -434,7 +395,7 @@ function App() {
                   </label>
                   <div className="relative">
                     <Droplets
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]"
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851] z-20"
                       size={18}
                       strokeWidth={1.5}
                     />
@@ -477,7 +438,7 @@ function App() {
                   </label>
                   <div className="relative">
                     <Timer
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]"
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851] z-20"
                       size={18}
                       strokeWidth={1.5}
                     />
@@ -501,7 +462,7 @@ function App() {
                   </label>
                   <div className="relative">
                     <Thermometer
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851]"
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8c7851] z-20"
                       size={18}
                       strokeWidth={1.5}
                     />
@@ -832,18 +793,6 @@ function App() {
           )}
         </div>
       </main>
-
-      <footer className="bg-[#3c3027] text-[#f8f5f0] p-4 mt-8 md:mt-12">
-        <div className="container mx-auto text-center text-sm">
-          <p className="font-handwritten text-lg mb-1">Loafs Brew Journal</p>
-          <p className="text-[#d3c5a9]">
-            Track your coffee journey, one extraction at a time
-          </p>
-          <p className="text-[#d3c5a9] mt-2 text-xs">
-            Generated entirely with vibes
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

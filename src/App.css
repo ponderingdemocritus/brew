@@ -107,8 +107,11 @@ input[type="range"]::-moz-range-thumb {
 .input-hipster {
   border: 1px solid #e5e1d9;
   border-radius: 0.25rem;
-  padding: 0.5rem;
+
   transition: all 0.2s ease;
+  position: relative;
+  background-color: #fff;
+  z-index: 1;
 }
 
 .input-hipster:focus {
@@ -134,4 +137,10 @@ input[type="range"]::-moz-range-thumb {
 
 .star-rating-filled {
   color: #8c7851;
+}
+
+/* Form icon positioning fix */
+.relative svg {
+  z-index: 10;
+  pointer-events: none;
 }
