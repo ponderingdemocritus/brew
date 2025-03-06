@@ -4,6 +4,7 @@ import CoffeeNavigation from "../components/CoffeeNavigation";
 import Navbar from "../components/Navbar";
 import { useState, useEffect } from "react";
 import { getSession, signOut } from "../services/authService";
+import { supabase } from "../lib/supabase";
 
 export const Route = createRootRoute({
   component: () => {
@@ -16,7 +17,9 @@ export const Route = createRootRoute({
     useEffect(() => {
       const checkAuth = async () => {
         try {
+          console.log("Root route checking session");
           const session = await getSession();
+          console.log("Root route session check result:", !!session);
           setAuthenticated(!!session);
         } catch (err) {
           console.error("Error checking authentication:", err);
@@ -27,6 +30,25 @@ export const Route = createRootRoute({
       };
 
       checkAuth();
+
+      // Set up auth state change listener
+      const { data: authListener } = supabase.auth.onAuthStateChange(
+        (event, session) => {
+          console.log("Root route: Auth state changed:", event, session);
+          if (event === "SIGNED_IN" && session) {
+            console.log("Root route: User signed in");
+            setAuthenticated(true);
+          } else if (event === "SIGNED_OUT") {
+            console.log("Root route: User signed out");
+            setAuthenticated(false);
+          }
+        }
+      );
+
+      // Clean up the listener
+      return () => {
+        authListener.subscription.unsubscribe();
+      };
     }, []);
 
     const handleSignOut = async () => {

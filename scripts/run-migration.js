@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 
-const fs = require("fs");
-const path = require("path");
-const { createClient } = require("@supabase/supabase-js");
-const dotenv = require("dotenv");
+import fs from 'fs';
+import path from 'path';
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
 
 // Load environment variables
 dotenv.config();
+
+// Get current directory in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
@@ -22,7 +27,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Path to migration file
 const migrationPath = path.join(
   __dirname,
-  "../supabase/migrations/20240630_coffee_extractions.sql"
+  "../supabase/migrations/20240601_bean_comments.sql"
 );
 
 // Read migration file

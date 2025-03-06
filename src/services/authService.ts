@@ -44,6 +44,27 @@ export const signInWithGitHub = async () => {
   return data;
 };
 
+// Sign in with X (Twitter)
+export const signInWithX = async () => {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "twitter",
+    options: {
+      redirectTo: `${window.location.origin}/auth`,
+      scopes: "tweet.read users.read email",
+      queryParams: {
+        force_login: "true",
+        include_email: "true",
+      },
+    },
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
 // Sign out
 export const signOut = async () => {
   const { error } = await supabase.auth.signOut();

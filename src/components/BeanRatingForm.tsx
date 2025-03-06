@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Save, X, Coffee, Droplet } from "lucide-react";
 import { BeanRating, BrewMethod, UIBean } from "../lib/types";
 import { addBeanRating, updateBeanRating } from "../services/beanRatingService";
@@ -25,6 +25,7 @@ type BeanRatingFormData = {
   body: number;
   balance: number;
   notes: string;
+  is_public: boolean;
 };
 
 const BeanRatingForm: React.FC<BeanRatingFormProps> = ({
@@ -44,12 +45,14 @@ const BeanRatingForm: React.FC<BeanRatingFormProps> = ({
     body: 0,
     balance: 0,
     notes: "",
+    is_public: true,
   });
 
   const [beans, setBeans] = useState<UIBean[]>([]);
   const [brewMethods, setBrewMethods] = useState<BrewMethod[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [formKey, setFormKey] = useState(Date.now()); // Add a key to force re-render when needed
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,7 +85,10 @@ const BeanRatingForm: React.FC<BeanRatingFormProps> = ({
         body: editingRating.body || 0,
         balance: editingRating.balance || 0,
         notes: editingRating.notes || "",
+        is_public: editingRating.is_public ?? true,
       });
+      // Force re-render to ensure all star ratings update
+      setFormKey(Date.now());
     } else if (beanId) {
       setFormData((prev) => ({
         ...prev,
@@ -96,19 +102,42 @@ const BeanRatingForm: React.FC<BeanRatingFormProps> = ({
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "notes" ? value : parseFloat(value) || 0,
-    }));
+    const { name, value, type } = e.target;
+
+    if (type === "checkbox") {
+      const target = e.target as HTMLInputElement;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: target.checked,
+      }));
+    } else if (name === "bean_id" || name === "brew_method_id") {
+      // Handle select inputs for beans and brew methods separately
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value, // Don't parse these as numbers, keep as string IDs
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: name === "notes" ? value : parseFloat(value) || 0,
+      }));
+    }
   };
 
-  const handleRatingChange = (name: string) => (value: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  // Memoize the rating change handler to prevent unnecessary re-renders
+  const handleRatingChange = useCallback(
+    (name: string) => (value: number) => {
+      setFormData((prev) => {
+        const newData = {
+          ...prev,
+          [name]: value,
+        };
+        console.log(`Rating changed: ${name} = ${value}`, newData);
+        return newData;
+      });
+    },
+    []
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,7 +177,7 @@ const BeanRatingForm: React.FC<BeanRatingFormProps> = ({
         </div>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} key={formKey}>
         <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -284,7 +313,7 @@ const BeanRatingForm: React.FC<BeanRatingFormProps> = ({
             </div>
           </div>
 
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Notes
             </label>
@@ -292,10 +321,33 @@ const BeanRatingForm: React.FC<BeanRatingFormProps> = ({
               name="notes"
               value={formData.notes}
               onChange={handleInputChange}
+              rows={4}
               className="w-full p-3 border border-gray-200 rounded-md focus:ring-[#8c7851] focus:border-[#8c7851] input-hipster"
-              placeholder="Tasting notes, impressions, etc."
-              rows={3}
-            />
+              placeholder="Describe your experience with this coffee..."
+            ></textarea>
+          </div>
+
+          <div className="md:col-span-2 mt-2">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="is_public"
+                name="is_public"
+                checked={formData.is_public}
+                onChange={handleInputChange}
+                className="h-4 w-4 text-[#8c7851] focus:ring-[#8c7851] border-gray-300 rounded"
+              />
+              <label
+                htmlFor="is_public"
+                className="ml-2 block text-sm text-gray-700"
+              >
+                Make this rating public (visible to all users)
+              </label>
+            </div>
+            <p className="text-xs text-gray-500 mt-1 ml-6">
+              Public ratings will appear in the global feed and can receive
+              comments from other users.
+            </p>
           </div>
         </div>
 

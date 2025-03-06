@@ -47,6 +47,16 @@ export interface BeanRating {
   body?: number;
   balance?: number;
   notes?: string;
+  is_public?: boolean;
+}
+
+// Bean Comment type
+export interface BeanComment {
+  id: string;
+  created_at?: string;
+  user_id?: string;
+  rating_id: string;
+  comment: string;
 }
 
 // UI types with additional properties for display
@@ -63,4 +73,24 @@ export interface UIBeanRating extends BeanRating {
   expanded?: boolean;
   bean_name?: string;
   brew_method_name?: string;
+  user_name?: string;
+  user_avatar?: string;
+  comments?: UIBeanComment[];
+  comment_count?: number;
+  likes?: number;
+}
+
+export interface UIBeanComment extends BeanComment {
+  user_name?: string;
+  user_avatar?: string;
+  created_at_formatted?: string;
+}
+
+// User profile type
+export interface UserProfile {
+  id: string;
+  username?: string;
+  full_name?: string;
+  avatar_url?: string;
+  bio?: string;
 }

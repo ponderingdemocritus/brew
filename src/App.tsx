@@ -250,47 +250,6 @@ function App() {
     }).format(price);
   };
 
-  // If authentication is still being checked, show loading
-  if (!authChecked) {
-    return (
-      <div className="min-h-screen bg-[#f8f5f0] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8c7851] mx-auto mb-4"></div>
-          <p className="text-[#3c3027]">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If not authenticated, show auth form
-  if (!authenticated) {
-    return (
-      <div className="min-h-screen bg-[#f8f5f0]">
-        <header className="bg-[#3c3027] text-[#f8f5f0] p-4 md:p-6 shadow-md">
-          <div className="container mx-auto">
-            <h1
-              className="text-2xl md:text-3xl font-bold flex items-center justify-center"
-              style={{ fontFamily: "'Playfair Display', serif" }}
-            >
-              <Coffee className="mr-3" strokeWidth={1.5} />
-              <span>Loafs Brew Journal</span>
-              <span className="ml-2 text-sm font-handwritten font-normal text-[#d3c5a9] mt-1">
-                est. 2025
-              </span>
-            </h1>
-          </div>
-        </header>
-
-        <main
-          className="container mx-auto p-4 md:p-6 flex items-center justify-center"
-          style={{ minHeight: "calc(100vh - 80px)" }}
-        >
-          <Auth onAuthSuccess={() => setAuthenticated(true)} />
-        </main>
-      </div>
-    );
-  }
-
   return (
     <div>
       <main className="container mx-auto">

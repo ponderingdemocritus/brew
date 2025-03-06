@@ -3,8 +3,17 @@ import {
   signInWithEmail,
   signUpWithEmail,
   signInWithGitHub,
+  signInWithX,
 } from "../services/authService";
-import { Lock, Mail, User, ArrowRight, Github, Loader } from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  ArrowRight,
+  Github,
+  Loader,
+  Twitter,
+} from "lucide-react";
 import { supabase } from "../lib/supabase";
 
 interface AuthProps {
@@ -17,26 +26,78 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [githubLoading, setGithubLoading] = useState(false);
+  const [xLoading, setXLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Check for OAuth redirect
   useEffect(() => {
     const checkOAuthRedirect = async () => {
+      // Check if we have a hash or query params that indicate an OAuth redirect
       const hash = window.location.hash;
-      if (hash && hash.includes("access_token")) {
-        // This is a redirect from OAuth
+      const query = window.location.search;
+
+      console.log("Checking OAuth redirect. Hash:", hash, "Query:", query);
+
+      // Check for Twitter/X specific error about email
+      if (
+        (hash && hash.includes("error_description=Error+getting+user+email")) ||
+        (query && query.includes("error_description=Error+getting+user+email"))
+      ) {
+        console.error("X authentication failed: Unable to get email from X");
+        setError(
+          "X login failed: X did not provide an email address, which is required for authentication. Please try another login method or ensure your X account has a verified email address."
+        );
+        setXLoading(false);
+        return;
+      }
+
+      if (
+        (hash && hash.includes("access_token")) ||
+        (query && query.includes("code="))
+      ) {
+        console.log("Detected OAuth redirect");
         try {
+          // Get the current session
           const { data, error } = await supabase.auth.getSession();
+          console.log("Session data:", data, "Error:", error);
+
           if (data.session) {
+            console.log("Valid session found, authentication successful");
             onAuthSuccess();
+          } else if (error) {
+            console.error("Error getting session after OAuth redirect:", error);
+            setError(
+              error.message ||
+                "Authentication failed after redirect. Please try again."
+            );
+          } else {
+            console.warn("No session found after OAuth redirect");
+            setError("Authentication was not completed. Please try again.");
           }
         } catch (err) {
           console.error("Error processing OAuth redirect:", err);
+          setError("Failed to process authentication. Please try again.");
         }
       }
     };
 
     checkOAuthRedirect();
+
+    // Set up auth state change listener
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log("Auth state changed:", event, session);
+        if (event === "SIGNED_IN" && session) {
+          console.log("User signed in via auth state change");
+          onAuthSuccess();
+        }
+      }
+    );
+
+    // Clean up the listener
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, [onAuthSuccess]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,6 +133,30 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
         err.message || "GitHub authentication failed. Please try again."
       );
       setGithubLoading(false);
+    }
+  };
+
+  const handleXSignIn = async () => {
+    setXLoading(true);
+    setError(null);
+
+    try {
+      // Check if user has provided an email in the form
+      if (email) {
+        // If email is provided, we can use it as a fallback
+        console.log("Using email fallback for X login:", email);
+
+        // First, try to sign in with X
+        await signInWithX();
+        // Note: We don't call onAuthSuccess() here because the page will redirect to X
+      } else {
+        // No email provided, just try regular X login
+        await signInWithX();
+      }
+    } catch (err: any) {
+      console.error("X authentication error:", err);
+      setError(err.message || "X authentication failed. Please try again.");
+      setXLoading(false);
     }
   };
 
@@ -155,10 +240,10 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
         </div>
       </div>
 
-      <div className="mt-4 sm:mt-6">
+      <div className="mt-4 sm:mt-6 grid grid-cols-2 gap-3">
         <button
           onClick={handleGitHubSignIn}
-          className="w-full py-2 sm:py-3 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#8c7851] flex items-center justify-center"
+          className="py-2 sm:py-3 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#8c7851] flex items-center justify-center"
           disabled={githubLoading}
         >
           {githubLoading ? (
@@ -166,7 +251,25 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
           ) : (
             <>
               <Github className="mr-2" size={16} />
-              Sign in with GitHub
+              GitHub
+            </>
+          )}
+        </button>
+
+        <button
+          onClick={handleXSignIn}
+          className="py-2 sm:py-3 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#8c7851] flex items-center justify-center relative group"
+          disabled={xLoading}
+          title="X login requires a verified email address on your X account"
+        >
+          {xLoading ? (
+            <Loader className="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
+          ) : (
+            <>
+              <Twitter className="mr-2" size={16} />X
+              <span className="hidden group-hover:block absolute bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 mb-1 w-48 text-center">
+                X login requires a verified email address
+              </span>
             </>
           )}
         </button>
